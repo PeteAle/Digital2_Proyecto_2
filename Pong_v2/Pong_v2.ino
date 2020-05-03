@@ -22,8 +22,8 @@ Componentes:
 
 #define bajarJ1 2
 #define subirJ1 3
-//#define bajarJ2 4
-//#define subirJ2 5
+#define bajarJ2 5
+#define subirJ2 6
 
 TFT_ILI9341 tft = TFT_ILI9341();
 
@@ -34,13 +34,13 @@ char j1b = 0;
 char j1s = 0;
 char j2b = 0;
 char j2s = 0;
-int lastX_tabla1 = 0;
 int lastY_tabla1 = 0;
-int X_tabla1 = 4;
+int lastY_tabla2 = 0;
+int X_tabla1 = 5;
 int Y_tabla1 = 90;
 char tablasAncho = 10;
 char tablasAlto = 40;
-int X_tabla2 = 306;
+int X_tabla2 = 305;
 int Y_tabla2 = 90;
 char score1 = 0;
 char score2 = 0;
@@ -54,8 +54,8 @@ void setup() {
 
   pinMode(bajarJ1, INPUT);
   pinMode(subirJ1, INPUT);
-  //pinMode(bajarJ2, INPUT);
-  //pinMode(subirJ2, INPUT);
+  pinMode(bajarJ2, INPUT);
+  pinMode(subirJ2, INPUT);
 
   tft.init();
 
@@ -84,10 +84,8 @@ void loop() {
     set_scoreboard();
     delay(500); 
     while(1){
-      
       mover_tabla1();
-
-      
+      mover_tabla2();
     }
   }
 }
@@ -125,10 +123,26 @@ void mover_tabla1(){
   }
 }
 
-void dibujarT1(){
-  tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+void mover_tabla2(){
+  j2b = digitalRead(bajarJ2);
+  j2s = digitalRead(subirJ2);
+  tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+  if (j2b == HIGH && Y_tabla2 < 199){
+    lastY_tabla2 = Y_tabla2;
+    Y_tabla2 += desfase;
+    tft.fillRect(X_tabla2, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla2, lastY_tabla2, tablasAncho, desfase, ILI9341_BLACK);
+    delay(100);
+  }
+  if (j2s == HIGH && Y_tabla2 > 32){
+    lastY_tabla2 = Y_tabla2;
+    Y_tabla2 -= desfase;
+    tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla2, lastY_tabla2+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
+    delay(100);
+  }
 }
 
-void mover_tabla2(){
-  
+void dibujarT1(){
+  tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
 }
