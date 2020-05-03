@@ -85,8 +85,12 @@ void loop() {
     delay(500); 
     while(1){
       
+<<<<<<< Updated upstream
       mover_tabla1();
       delay(100);
+=======
+      mover_tablas(j1b, j1s, bajarJ1, subirJ1, X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE, lastY_tabla1, ILI9341_BLACK);
+>>>>>>> Stashed changes
       
     }
   }
@@ -105,6 +109,7 @@ void set_scoreboard(){
   tft.drawFastHLine(0,28,320,ILI9341_WHITE);
 }
 
+<<<<<<< Updated upstream
 void mover_tabla1(){
   j1b = digitalRead(bajarJ1);
   j1s = digitalRead(subirJ1);
@@ -121,6 +126,24 @@ void mover_tabla1(){
     Y_tabla1 -= desfase;
     tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
     tft.fillRect(X_tabla1, lastY_tabla1+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
+=======
+void mover_tablas(char jugadorBajada, char jugadorSubida, char botonBajada, char botonSubida, char X_tabla, int Y_tabla, char anchoTabla, char altoTabla, int color, char lastY_tabla, int color2){
+  jugadorBajada = digitalRead(botonBajada);
+  jugadorSubida = digitalRead(botonSubida);
+  tft.fillRect(X_tabla, Y_tabla, anchoTabla, altoTabla, color);
+  if (jugadorBajada == HIGH && Y_tabla < 199){
+    lastY_tabla = Y_tabla;
+    Y_tabla += desfase;
+    tft.fillRect(X_tabla, Y_tabla, anchoTabla, altoTabla, color);
+    tft.fillRect(X_tabla, lastY_tabla, anchoTabla, desfase, color2);
+    
+  }
+  else if (jugadorSubida == HIGH && Y_tabla > 32){
+    lastY_tabla = Y_tabla;
+    Y_tabla -= desfase;
+    tft.fillRect(X_tabla, Y_tabla, anchoTabla, altoTabla, color);
+    tft.fillRect(X_tabla, lastY_tabla+desfaseSubida, anchoTabla, desfase, color2);
+>>>>>>> Stashed changes
   }
 }
 
