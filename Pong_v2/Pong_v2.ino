@@ -8,9 +8,10 @@ Componentes:
     - Pong acelerado.
     - Pong con bola que desaparece.*/
 
+//----------------------------------------------------------- Includes de las bibliotecas -------------------------------------------------------------------
+
 #include "SPI.h"
 #include "Adafruit_GFX.h"
-//#include "Adafruit_ILI9341.h"
 #include "TFT_FastPin.h"
 #include "TFT_ILI9341.h"
 #include "User_Setup.h"
@@ -27,8 +28,11 @@ Componentes:
 
 // Pin 4 del Arduino está dañado.
 
-// Inicializar la comunicación SPI con la pantalla TFT usando las definiciones anteriores.
+//------------------------ Inicializar la comunicación SPI con la pantalla TFT usando las definiciones anteriores. --------------------------------------------
+
 TFT_ILI9341 tft = TFT_ILI9341();
+
+//--------------------------------------------- Creación de variables -----------------------------------------------------------------------------------------
 
 int anchoPantalla = 320; //tft.width();  // Ancho de la pantalla.
 int altoPantalla = 240; //tft.height();  // Alto de la pantalla.
@@ -48,37 +52,39 @@ int Y_tabla2 = 116;   // Posición Y de la tabla 2.
 char desfase = 5;
 char desfaseSubida = tablasAlto - desfase;
 
-char score1 = 0;
-char score2 = 0;
-char resetBit = 0;
+char score1 = 0;    // Puntaje jugador 1.
+char score2 = 0;    // Puntaje jugador 2.
 
-int lastBallX = 0;
-int lastBallY = 0;
-int ballX = 160;
-int ballY = 138;
-char ballSize = 4;
-int xDir = 1;
-int yDir = 1;
-int moverX = 0;
-int moverY = 0;
+int lastBallX = 0;  // Última posición X de la pelota.
+int lastBallY = 0;  // Última posición Y de la pelota.
+int ballX = 160;    // Posición inicial X de la pelota.
+int ballY = 138;    // Posición inicial Y de la pelota.
+char ballSize = 4;  // Radio de la pelota.
+int xDir = 1;       // Valor que se le va a sumar a la posición X de la pelota para que esta se mueva.
+int yDir = 1;       // Valor que se le va a sumar a la posición Y de la pelota para que esta se mueva.
+int moverX = 0;     // Posición X resultante de la suma anterior.
+int moverY = 0;     // Posición X resultante de la suma anterior.
+
+//------------------------------------------ Setup de los botones, inicialización de pantalla TFT, pantalla de inicio --------------------------------------------
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.println("PONG v2");
 
-  pinMode(bajarJ1, INPUT);
-  pinMode(subirJ1, INPUT);
-  pinMode(bajarJ2, INPUT);
-  pinMode(subirJ2, INPUT);
+  pinMode(bajarJ1, INPUT);  // Set el pin 2 como input.
+  pinMode(subirJ1, INPUT);  // Set el pin 3 como input.
+  pinMode(bajarJ2, INPUT);  // Set el pin 5 como input.
+  pinMode(subirJ2, INPUT);  // Set el pin 6 como input.
 
-  tft.init();
+  tft.init(); // Inicialización de la pantalla TFT.
 
-  tft.setRotation(1);
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setCursor(115,80);
-  tft.setTextColor(ILI9341_WHITE); tft.setTextSize(4);
-  tft.println("PONG");
+  // Esta progra es para establecer la pantalla de inicio.
+  tft.setRotation(1);   // Orientación landscape.
+  tft.fillScreen(ILI9341_BLACK);  // Pantalla negra.
+  tft.setCursor(115,80);  // Poner el cursor en esta posición.
+  tft.setTextColor(ILI9341_WHITE); tft.setTextSize(4);  // Color y tamaño de letra.
+  tft.println("PONG");   
   tft.setTextSize(2);
   tft.setCursor(60,160);
   tft.println("Presione un boton");
@@ -86,6 +92,8 @@ void setup() {
   tft.println("para empezar");
   tft.setCursor(90,200);
 }
+
+//---------------------------------------------------------- Loop principal, el juego se lleva a cabo aquí -----------------------------------------------------
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -96,7 +104,6 @@ void loop() {
   if (j1b == HIGH || j1s == HIGH || j2b == HIGH || j2s == HIGH){
     tft.fillScreen(ILI9341_BLACK);
     set_scoreboard();
-    //delay(500); 
     while(1){
       mover_tabla1();
       mover_tabla2();
@@ -105,27 +112,34 @@ void loop() {
   }
 }
 
+//----------------------------------------------------------- Funciones utilizadas ----------------------------------------------------------------------------
+
+// Función para establecer el tablero de puntaje.
 void set_scoreboard(){
   tft.setCursor(40,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
-  tft.println(score1, DEC);
+  tft.println(score1, DEC);   // Puntaje del jugador 1.
   tft.setCursor(100,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
   tft.println("PUNTAJE");
   tft.setCursor(265,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
-  tft.println(score2, DEC);
-  tft.drawFastHLine(0,28,320,ILI9341_WHITE);
+  tft.println(score2, DEC);   // Puntaje del jugador 2.
+  tft.drawFastHLine(0,28,320,ILI9341_WHITE);  // Línea de separación del tablero de puntaje y el juego.
 }
 
+// Código para que el jugador 1 pueda mover su tabla con los botones.
 void mover_tabla1(){
   j1b = digitalRead(bajarJ1);
   j1s = digitalRead(subirJ1);
   dibujarT1();
-  //tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+  
+  // El código siguiente se asegura que cada vez que el jugador mueva su tabla, se borre la parte de la tabla que se encuentra en la posición anterior,
+  // para evitar que la tabla actúe como un marcador (no deje rastros donde se mueva).
+  
   if (j1b == HIGH && Y_tabla1 < 240-tablasAlto){
-    lastY_tabla1 = Y_tabla1;
-    Y_tabla1 += desfase;
+    lastY_tabla1 = Y_tabla1;  // La posición actual de la tabla se convierte en la pasada.
+    Y_tabla1 += desfase;      // Establece 
     tft.fillRect(X_tabla1, lastY_tabla1, tablasAncho, desfase, ILI9341_BLACK);
     tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
     delay(5);
@@ -139,11 +153,15 @@ void mover_tabla1(){
   }
 }
 
+// Código para que el jugador 2 pueda mover su tabla con los botones.
 void mover_tabla2(){
   j2b = digitalRead(bajarJ2);
   j2s = digitalRead(subirJ2);
   dibujarT2();
-  //tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+  
+  // El código siguiente se asegura que cada vez que el jugador mueva su tabla, se borre la parte de la tabla que se encuentra en la posición anterior,
+  // para evitar que la tabla actúe como un marcador (no deje rastros donde se mueva).
+  
   if (j2b == HIGH && Y_tabla2 < 240-tablasAlto){
     lastY_tabla2 = Y_tabla2;
     Y_tabla2 += desfase;
@@ -168,12 +186,12 @@ void dibujarT2(){
   tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
 }
 
+// Este código se llama cada vez que algun jugador anote un punto. Borra la última posición de la pelota y las vuelve a colocar en el centro.
 void resetBall(){
   tft.fillCircle(lastBallX, lastBallY, ballSize, ILI9341_BLACK);
   ballX = 160;
   ballY = 138;
   tft.fillCircle(ballX, ballY, ballSize, ILI9341_YELLOW);
-  resetBit = 1;
   xDir *= -1;
   yDir *= -1;
   moverX = ballX;
@@ -183,6 +201,7 @@ void resetBall(){
   delay(500);
 }
 
+// Función para darle un punto al jugador 1.
 void puntoJ1(){
   tft.fillRect(40,2,27,25,ILI9341_BLACK);
   tft.setCursor(40,2);
@@ -190,6 +209,7 @@ void puntoJ1(){
   tft.println(score1+=1, DEC);
 }
 
+// Función para darle un punto al jugador 2.
 void puntoJ2(){
   tft.fillRect(265,2,27,25,ILI9341_BLACK);
   tft.setCursor(265,2);
@@ -197,28 +217,51 @@ void puntoJ2(){
   tft.println(score2+=1, DEC);
 }
 
+// Función principal que se encarga del movimiento de la pelota, además de limitar su movimiento de manera que el juego funcione. Establece que cuando
+// golpea una tabla, rebote y cuando toque un lugar donde no se encuentre la tabla, el jugador opuesto obtiene un punto.
 void drawBall(){
   tft.fillCircle(lastBallX, lastBallY, ballSize, ILI9341_BLACK);
   tft.fillCircle(ballX, ballY, ballSize, ILI9341_YELLOW);
-  lastBallX = ballX;
-  lastBallY = ballY;
-  moverX = ballX + xDir;
-  moverY = ballY + yDir;
+  lastBallX = ballX;    // Guarda la posición X de la bola como la posición pasada.
+  lastBallY = ballY;    // Guarda la posición Y de la bola como la posición pasada.
+  moverX = ballX + xDir;  // Le suma xDir a la posición X para que la pelota se mueva.
+  moverY = ballY + yDir;  // Le suma yDir a la posoción Y para que la pelota se mueva.
   if (moverX + ballSize == anchoPantalla){
     if (score1 < 10 && score2 < 10){
       puntoJ1();
+      
+      //------------------------------------------
+      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
+      //------------------------------------------
+      
       resetBall();
       while (score1 == 10 && score2 < 10){
-      // hacer print que jugador 1 es el ganador.
-      // código de reset juego.
+        
+        //---------------------------------------------------------
+        // PONER AQUÍ EL SONIDO DE VICTORIA CUANDO UN JUGADOR GANA.
+        //---------------------------------------------------------
+        
+        // hacer print que jugador 1 es el ganador.
+        // código de reset juego.
+        
       } 
     }
   }
   else if (moverX == 0){
     if (score1 < 10 && score2 < 10){
       puntoJ2();
+
+      //------------------------------------------
+      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
+      //------------------------------------------
+      
       resetBall();
       while (score1 < 10 && score2 == 10){
+
+        //---------------------------------------------------------
+        // PONER AQUÍ EL SONIDO DE VICTORIA CUANDO UN JUGADOR GANA.
+        //---------------------------------------------------------
+        
         // hacer print que jugador 2 es el ganador.
         // código de reset juego.
       }
@@ -226,27 +269,27 @@ void drawBall(){
   }
   // El siguiente código será para limitar a la pelota para que rebote solamente cuando entre en contacto con la tabla del J2 (derecha).
   if (moverX > 0 && (moverX+ballSize) < anchoPantalla){
-    //if (resetBit == 1){
-    //  ballX = 160;
-    //  ballY = 138;
-    //  lastBallX = ballX;
-    //  lastBallY = ballY;
-    //  moverX = ballX + xDir;
-    //  moverY = ballY + yDir;
-    //  tft.fillCircle(lastBallX, lastBallY, ballSize, ILI9341_BLACK);
-    //  resetBit = 0;
-    //}
     ballX = moverX;
     delay(2);
-    if ((moverX+ballSize) == X_tabla2 && moverY >= Y_tabla2 && (moverY+ballSize) <= (Y_tabla2+tablasAlto) || moverX == (X_tabla1+tablasAncho) && moverY >= Y_tabla1 && (moverY+ballSize) <= (Y_tabla1+tablasAlto)){
+    if ((moverX+ballSize) == X_tabla2 && (moverY) >= (Y_tabla2-2) && (moverY+(ballSize/2)) <= (Y_tabla2+tablasAlto) || moverX == (X_tabla1+tablasAncho) && moverY >= (Y_tabla1-2) && (moverY+(ballSize/2)) <= (Y_tabla1+tablasAlto)){
       xDir *= -1;
       //yDir *= -1;
       ballX += xDir;
       //ballY += yDir;
+
+      //---------------------------------------------
+      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
+      //---------------------------------------------
+      
     }
     else if (moverY == 32 || (moverY+ballSize) == altoPantalla){
       yDir *= -1;
       ballY += yDir;
+      
+      //---------------------------------------------
+      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
+      //---------------------------------------------
+      
     }
   }
   if (moverY > 32 && (moverY+ballSize) < altoPantalla){
@@ -255,6 +298,11 @@ void drawBall(){
     if (moverY == 32 || (moverY+ballSize) == altoPantalla){
       xDir *= -1;
       yDir *= -1;
+
+      //---------------------------------------------
+      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
+      //---------------------------------------------
+      
       ballX += xDir;
       ballY += yDir;
     }
