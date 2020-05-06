@@ -15,6 +15,7 @@ Componentes:
 #include "TFT_FastPin.h"
 #include "TFT_ILI9341.h"
 #include "User_Setup.h"
+#include "pitches.h"
 
 // Pines de DC y CS defaults.
 #define TFT_RST 7 // Definir el pin 7 como el reset.
@@ -28,6 +29,7 @@ Componentes:
 
 // Pin 4 del Arduino está dañado.
 
+#include "pitches.h"
 //------------------------ Inicializar la comunicación SPI con la pantalla TFT usando las definiciones anteriores. --------------------------------------------
 
 TFT_ILI9341 tft = TFT_ILI9341();
@@ -65,6 +67,53 @@ int yDir = 1;       // Valor que se le va a sumar a la posición Y de la pelota 
 int moverX = 0;     // Posición X resultante de la suma anterior.
 int moverY = 0;     // Posición X resultante de la suma anterior.
 
+
+/*int melody[]={NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4}; //Melodía con el buzzer
+int noteDurations[]={4, 8, 8, 4, 4, 4, 4, 4}; //Duración de las notas*/
+
+int melody[]={ NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0, 
+   NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0, 
+   NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+   NOTE_A4, NOTE_G4, NOTE_A4, 0,
+   
+   NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0, 
+   NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0, 
+   NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+   NOTE_A4, NOTE_G4, NOTE_A4, 0,
+   
+   NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0, 
+   NOTE_A4, NOTE_C5, NOTE_D5, NOTE_D5, 0, 
+   NOTE_D5, NOTE_E5, NOTE_F5, NOTE_F5, 0,
+   NOTE_E5, NOTE_D5, NOTE_E5, NOTE_A4, 0,
+   
+   NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0, 
+   NOTE_D5, NOTE_E5, NOTE_A4, 0, 
+   NOTE_A4, NOTE_C5, NOTE_B4, NOTE_B4, 0,
+   NOTE_C5, NOTE_A4, NOTE_B4, 0,
+
+   NOTE_A4, NOTE_A4}; //Melodía con el buzzer
+   
+int noteDurations[]={125, 125, 250, 125, 125, 
+  125, 125, 250, 125, 125,
+  125, 125, 250, 125, 125,
+  125, 125, 375, 125, 
+  
+  125, 125, 250, 125, 125, 
+  125, 125, 250, 125, 125,
+  125, 125, 250, 125, 125,
+  125, 125, 375, 125, 
+  
+  125, 125, 250, 125, 125, 
+  125, 125, 250, 125, 125,
+  125, 125, 250, 125, 125,
+  125, 125, 125, 250, 125,
+
+  125, 125, 250, 125, 125, 
+  250, 125, 250, 125, 
+  125, 125, 250, 125, 125,
+  125, 125, 375, 375,
+
+  250, 125}; //Duración de las notas
 //------------------------------------------ Setup de los botones, inicialización de pantalla TFT, pantalla de inicio --------------------------------------------
 
 void setup() {
@@ -108,6 +157,7 @@ void loop() {
       mover_tabla1();
       mover_tabla2();
       drawBall();
+      scoreChange();
     }
   }
 }
@@ -142,14 +192,16 @@ void mover_tabla1(){
     Y_tabla1 += desfase;      // Establece 
     tft.fillRect(X_tabla1, lastY_tabla1, tablasAncho, desfase, ILI9341_BLACK);
     tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
-    delay(5);
+    //tone (9, 233, 250);
+    delay(2);
   }
   if (j1s == HIGH && Y_tabla1 > 32){
     lastY_tabla1 = Y_tabla1;
     Y_tabla1 -= desfase;
     tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
     tft.fillRect(X_tabla1, lastY_tabla1+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
-    delay(5);
+    //tone (9, 233, 250);
+    delay(2);
   }
 }
 
@@ -167,6 +219,7 @@ void mover_tabla2(){
     Y_tabla2 += desfase;
     tft.fillRect(X_tabla2, lastY_tabla2, tablasAncho, desfase, ILI9341_BLACK);
     tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+    //tone (9, 233, 250);
     delay(2);
   }
   if (j2s == HIGH && Y_tabla2 > 32){
@@ -174,6 +227,7 @@ void mover_tabla2(){
     Y_tabla2 -= desfase;
     tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
     tft.fillRect(X_tabla2, lastY_tabla2+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
+    //tone (9, 233, 250);
     delay(2);
   }
 }
@@ -217,6 +271,96 @@ void puntoJ2(){
   tft.println(score2+=1, DEC);
 }
 
+// Función para poder reiniciar el juego cuando alguien haya ganado.
+void resetGame(){
+  score1 = 0;
+  score2 = 0;
+  tft.fillRect(40,2,27,25,ILI9341_BLACK);
+  tft.setCursor(40,2);
+  tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
+  tft.println(score1, DEC);
+  tft.fillRect(265,2,27,25,ILI9341_BLACK);
+  tft.setCursor(265,2);
+  tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
+  tft.println(score2,DEC);
+}
+
+void scoreChange(){
+  if (moverX + ballSize == anchoPantalla){
+    if (score1 < 10 && score2 < 10){
+      puntoJ1();
+      
+      //------------------------------------------
+      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
+      //------------------------------------------
+      tone (9,392,250);
+      tone (9,311,250);
+      tone (9,247,250); //Sonido de perder un punto
+      resetBall();
+      if (score1 == 5 && score2 < 5){
+        int thisNote=0;
+        for (thisNote == 0; thisNote < 78; thisNote++){
+          int noteDuration = noteDurations [thisNote]*1.5;
+          tone(9, melody[thisNote], noteDuration);
+          
+          delay (noteDuration);
+
+          noTone(9);
+        }
+        while (score1 == 5 && score2 < 5){
+          j1b = digitalRead(bajarJ1);
+          j1s = digitalRead(subirJ1);
+          j2b = digitalRead(bajarJ2);
+          j2s = digitalRead(subirJ2);
+          if (j1b == HIGH || j1s == HIGH || j2b == HIGH || j2s == HIGH){
+            delay(100);
+            resetGame();
+          }
+          // hacer print que jugador 1 es el ganador.
+          // código de reset juego.
+        }       
+      } 
+    }
+  }
+  else if (moverX == 0){
+    if (score1 < 5 && score2 < 5){
+      puntoJ2();
+      
+      tone (9,392,250);
+      tone (9,311,250);
+      tone (9,247,250); //Sonido de perder un punto
+      //------------------------------------------
+      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
+      //------------------------------------------
+      
+      resetBall();
+      if (score1 < 5 && score2 == 5){
+        int thisNote=0;
+        for (thisNote == 0; thisNote < 78; thisNote++){
+          int noteDuration = noteDurations [thisNote]*1.5;
+          tone(9, melody[thisNote], noteDuration);
+
+          delay (noteDuration);
+
+          noTone(9);
+         }
+        while (score1 < 5 && score2 == 5){
+          j1b = digitalRead(bajarJ1);
+          j1s = digitalRead(subirJ1);
+          j2b = digitalRead(bajarJ2);
+          j2s = digitalRead(subirJ2);
+          if (j1b == HIGH || j1s == HIGH || j2b == HIGH || j2s == HIGH){
+            delay(100);
+            resetGame();
+          // hacer print que jugador 2 es el ganador.
+          // código de reset juego.
+          }
+        }
+      }
+    }
+  }
+}
+
 // Función principal que se encarga del movimiento de la pelota, además de limitar su movimiento de manera que el juego funcione. Establece que cuando
 // golpea una tabla, rebote y cuando toque un lugar donde no se encuentre la tabla, el jugador opuesto obtiene un punto.
 void drawBall(){
@@ -226,47 +370,7 @@ void drawBall(){
   lastBallY = ballY;    // Guarda la posición Y de la bola como la posición pasada.
   moverX = ballX + xDir;  // Le suma xDir a la posición X para que la pelota se mueva.
   moverY = ballY + yDir;  // Le suma yDir a la posoción Y para que la pelota se mueva.
-  if (moverX + ballSize == anchoPantalla){
-    if (score1 < 10 && score2 < 10){
-      puntoJ1();
-      
-      //------------------------------------------
-      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
-      //------------------------------------------
-      
-      resetBall();
-      while (score1 == 10 && score2 < 10){
-        
-        //---------------------------------------------------------
-        // PONER AQUÍ EL SONIDO DE VICTORIA CUANDO UN JUGADOR GANA.
-        //---------------------------------------------------------
-        
-        // hacer print que jugador 1 es el ganador.
-        // código de reset juego.
-        
-      } 
-    }
-  }
-  else if (moverX == 0){
-    if (score1 < 10 && score2 < 10){
-      puntoJ2();
-
-      //------------------------------------------
-      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
-      //------------------------------------------
-      
-      resetBall();
-      while (score1 < 10 && score2 == 10){
-
-        //---------------------------------------------------------
-        // PONER AQUÍ EL SONIDO DE VICTORIA CUANDO UN JUGADOR GANA.
-        //---------------------------------------------------------
-        
-        // hacer print que jugador 2 es el ganador.
-        // código de reset juego.
-      }
-    }
-  }
+  
   // El siguiente código será para limitar a la pelota para que rebote solamente cuando entre en contacto con la tabla del J2 (derecha).
   if (moverX > 0 && (moverX+ballSize) < anchoPantalla){
     ballX = moverX;
@@ -277,18 +381,14 @@ void drawBall(){
       ballX += xDir;
       //ballY += yDir;
 
-      //---------------------------------------------
-      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
-      //---------------------------------------------
+      tone (9,466,250);//Sonido de choque
       
     }
     else if (moverY == 32 || (moverY+ballSize) == altoPantalla){
       yDir *= -1;
       ballY += yDir;
       
-      //---------------------------------------------
-      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
-      //---------------------------------------------
+      tone (9,466,250);//Sonido de choque
       
     }
   }
@@ -299,9 +399,7 @@ void drawBall(){
       xDir *= -1;
       yDir *= -1;
 
-      //---------------------------------------------
-      // COLOCAR SONIDO DE CHOQUE CON UNA SUPERFICIE.
-      //---------------------------------------------
+      tone (9,466,250);//Sonido de choque
       
       ballX += xDir;
       ballY += yDir;
