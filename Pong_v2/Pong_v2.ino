@@ -16,11 +16,11 @@ Componentes:
 #include "TFT_ILI9341.h"
 #include "User_Setup.h"
 #include "pitches.h"
-
 // Pines de DC y CS defaults.
 #define TFT_RST 7 // Definir el pin 7 como el reset.
 #define TFT_DC 8  // Definir pin 8 como DC.
 #define TFT_CS 10 // Definir pin 10 como chip select.
+
 
 #define bajarJ1 2 // Definir pin 2 como el input para bajar la barra del jugador 1.
 #define subirJ1 3 // DEfinit pin 3 como el input para subir la barra del jugador 1.
@@ -67,7 +67,11 @@ int yDir = 1;       // Valor que se le va a sumar a la posición Y de la pelota 
 int moverX = 0;     // Posición X resultante de la suma anterior.
 int moverY = 0;     // Posición X resultante de la suma anterior.
 
-
+extern uint8_t cofre1 [];
+//extern uint8_t cofre2 [];
+extern uint8_t cofre3 [];
+//extern uint8_t cofre4 [];
+extern uint8_t cofre5 [];
 /*int melody[]={NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4}; //Melodía con el buzzer
 int noteDurations[]={4, 8, 8, 4, 4, 4, 4, 4}; //Duración de las notas*/
 
@@ -119,6 +123,9 @@ int noteDurations[]={125, 125, 250, 125, 125,
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+
+
+      
   Serial.println("PONG v2");
 
   pinMode(bajarJ1, INPUT);  // Set el pin 2 como input.
@@ -141,6 +148,7 @@ void setup() {
   tft.println("para empezar");
   tft.setCursor(90,200);
 }
+
 
 //---------------------------------------------------------- Loop principal, el juego se lleva a cabo aquí -----------------------------------------------------
 
@@ -275,6 +283,7 @@ void puntoJ2(){
 void resetGame(){
   score1 = 0;
   score2 = 0;
+  tft.fillRect(100,76,120,89,ILI9341_BLACK);
   tft.fillRect(40,2,27,25,ILI9341_BLACK);
   tft.setCursor(40,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
@@ -290,14 +299,13 @@ void scoreChange(){
     if (score1 < 10 && score2 < 10){
       puntoJ1();
       
-      //------------------------------------------
-      // COLOCAR AQUÍ EL SONIDO DE PERDER UN PUNTO
-      //------------------------------------------
       tone (9,392,250);
       tone (9,311,250);
       tone (9,247,250); //Sonido de perder un punto
+      
       resetBall();
       if (score1 == 5 && score2 < 5){
+        tft.fillCircle(160,138,4,ILI9341_BLACK);
         int thisNote=0;
         for (thisNote == 0; thisNote < 78; thisNote++){
           int noteDuration = noteDurations [thisNote]*1.5;
@@ -307,6 +315,7 @@ void scoreChange(){
 
           noTone(9);
         }
+        Ganar();
         while (score1 == 5 && score2 < 5){
           j1b = digitalRead(bajarJ1);
           j1s = digitalRead(subirJ1);
@@ -316,7 +325,7 @@ void scoreChange(){
             delay(100);
             resetGame();
           }
-          // hacer print que jugador 1 es el ganador.
+          
           // código de reset juego.
         }       
       } 
@@ -335,6 +344,7 @@ void scoreChange(){
       
       resetBall();
       if (score1 < 5 && score2 == 5){
+        tft.fillCircle(160,138,4,ILI9341_BLACK);
         int thisNote=0;
         for (thisNote == 0; thisNote < 78; thisNote++){
           int noteDuration = noteDurations [thisNote]*1.5;
@@ -344,6 +354,7 @@ void scoreChange(){
 
           noTone(9);
          }
+         Ganar();
         while (score1 < 5 && score2 == 5){
           j1b = digitalRead(bajarJ1);
           j1s = digitalRead(subirJ1);
@@ -351,8 +362,9 @@ void scoreChange(){
           j2s = digitalRead(subirJ2);
           if (j1b == HIGH || j1s == HIGH || j2b == HIGH || j2s == HIGH){
             delay(100);
+          
             resetGame();
-          // hacer print que jugador 2 es el ganador.
+            
           // código de reset juego.
           }
         }
@@ -405,4 +417,32 @@ void drawBall(){
       ballY += yDir;
     }
   } // Aquí termina la progra para limitar la bola al entrar en contacto con la tabla del J2 (derecha).
+}
+void drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {
+
+  int16_t i, j, byteWidth = (w + 7) / 8;
+  uint8_t byte;
+
+  for(j=0; j<h; j++) {
+    for(i=0; i<w; i++) {
+      if(i & 7) byte <<= 1;
+      else      byte   = pgm_read_byte(bitmap + j * byteWidth + i / 8);
+      if(byte & 0x80) tft.drawPixel(x+i, y+j, color);
+    }
+  }
+}
+
+void Ganar(){
+  drawBitmap(100,76,cofre1,120,89,ILI9341_WHITE);
+  delay(200);
+  tft.fillRect(100,76,120,89,ILI9341_BLACK);
+  //drawBitmap(100,66,cofre2,120,109,0xFFFF);
+  //delay(200);
+  drawBitmap(93,60,cofre3,135,120,ILI9341_WHITE);
+  delay(200);
+  tft.fillRect(100,76,120,89,ILI9341_BLACK);
+  //drawBitmap(80,64,cofre4,160,113,0xFFFF);
+  //delay(200);
+  drawBitmap(95,62,cofre5,130,116,ILI9341_WHITE);   
+  delay(200);
 }
