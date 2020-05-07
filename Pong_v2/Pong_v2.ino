@@ -138,9 +138,9 @@ void setup() {
   // Esta progra es para establecer la pantalla de inicio.
   tft.setRotation(1);   // Orientación landscape.
   tft.fillScreen(ILI9341_BLACK);  // Pantalla negra.
-  tft.setCursor(115,80);  // Poner el cursor en esta posición.
+  tft.setCursor(30,80);  // Poner el cursor en esta posición.
   tft.setTextColor(ILI9341_WHITE); tft.setTextSize(4);  // Color y tamaño de letra.
-  tft.println("PONG");   
+  tft.println("PIRATE PONG");   
   tft.setTextSize(2);
   tft.setCursor(60,160);
   tft.println("Presione un boton");
