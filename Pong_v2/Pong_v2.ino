@@ -27,9 +27,6 @@ Componentes:
 #define bajarJ2 5 // Definir pin 5 como el input para bajar la barra del jugador 2.
 #define subirJ2 6 // Definit pin 6 como el input para subir la barra del jugador 2.
 
-// Pin 4 del Arduino está dañado.
-
-#include "pitches.h"
 //------------------------ Inicializar la comunicación SPI con la pantalla TFT usando las definiciones anteriores. --------------------------------------------
 
 TFT_ILI9341 tft = TFT_ILI9341();
@@ -434,15 +431,14 @@ void drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h
 
 void Ganar(){
   drawBitmap(100,76,cofre1,120,89,ILI9341_WHITE);
-  delay(200);
+  delay(2);
   tft.fillRect(100,76,120,89,ILI9341_BLACK);
   //drawBitmap(100,66,cofre2,120,109,0xFFFF);
   //delay(200);
   drawBitmap(93,60,cofre3,135,120,ILI9341_WHITE);
-  delay(200);
+  delay(2);
   tft.fillRect(100,76,120,89,ILI9341_BLACK);
   //drawBitmap(80,64,cofre4,160,113,0xFFFF);
   //delay(200);
-  drawBitmap(95,62,cofre5,130,116,ILI9341_WHITE);   
-  delay(200);
+  drawBitmap(95,62,cofre5,130,116,ILI9341_WHITE);
 }
