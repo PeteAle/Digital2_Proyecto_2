@@ -27,6 +27,9 @@ Componentes:
 #define bajarJ2 5 // Definir pin 5 como el input para bajar la barra del jugador 2.
 #define subirJ2 6 // Definit pin 6 como el input para subir la barra del jugador 2.
 
+// Pin 4 del Arduino está dañado.
+
+#include "pitches.h"
 //------------------------ Inicializar la comunicación SPI con la pantalla TFT usando las definiciones anteriores. --------------------------------------------
 
 TFT_ILI9341 tft = TFT_ILI9341();
@@ -196,14 +199,14 @@ void mover_tabla1(){
     lastY_tabla1 = Y_tabla1;  // La posición actual de la tabla se convierte en la pasada.
     Y_tabla1 += desfase;      // Establece 
     tft.fillRect(X_tabla1, lastY_tabla1, tablasAncho, desfase, ILI9341_BLACK);
-    tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_ORANGE);
     //tone (9, 233, 250);
     delay(2);
   }
   if (j1s == HIGH && Y_tabla1 > 32){
     lastY_tabla1 = Y_tabla1;
     Y_tabla1 -= desfase;
-    tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_ORANGE);
     tft.fillRect(X_tabla1, lastY_tabla1+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
     //tone (9, 233, 250);
     delay(2);
@@ -223,14 +226,14 @@ void mover_tabla2(){
     lastY_tabla2 = Y_tabla2;
     Y_tabla2 += desfase;
     tft.fillRect(X_tabla2, lastY_tabla2, tablasAncho, desfase, ILI9341_BLACK);
-    tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_GREENYELLOW);
     //tone (9, 233, 250);
     delay(2);
   }
   if (j2s == HIGH && Y_tabla2 > 32){
     lastY_tabla2 = Y_tabla2;
     Y_tabla2 -= desfase;
-    tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+    tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_GREENYELLOW);
     tft.fillRect(X_tabla2, lastY_tabla2+desfaseSubida, tablasAncho, desfase, ILI9341_BLACK);
     //tone (9, 233, 250);
     delay(2);
@@ -238,11 +241,11 @@ void mover_tabla2(){
 }
 
 void dibujarT1(){
-  tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_WHITE);
+  tft.fillRect(X_tabla1, Y_tabla1, tablasAncho, tablasAlto, ILI9341_ORANGE);
 }
 
 void dibujarT2(){
-  tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_WHITE);
+  tft.fillRect(X_tabla2, Y_tabla2, tablasAncho, tablasAlto, ILI9341_GREENYELLOW);
 }
 
 // Este código se llama cada vez que algun jugador anote un punto. Borra la última posición de la pelota y las vuelve a colocar en el centro.
@@ -264,7 +267,7 @@ void resetBall(){
 void puntoJ1(){
   tft.fillRect(40,2,27,25,ILI9341_BLACK);
   tft.setCursor(40,2);
-  tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3); tft.setTextColor(ILI9341_ORANGE);
   tft.println(score1+=1, DEC);
 }
 
@@ -272,7 +275,7 @@ void puntoJ1(){
 void puntoJ2(){
   tft.fillRect(265,2,27,25,ILI9341_BLACK);
   tft.setCursor(265,2);
-  tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3); tft.setTextColor(ILI9341_GREENYELLOW);
   tft.println(score2+=1, DEC);
 }
 
@@ -280,7 +283,8 @@ void puntoJ2(){
 void resetGame(){
   score1 = 0;
   score2 = 0;
-  tft.fillRect(100,76,120,89,ILI9341_BLACK);
+  ballX = 160;
+  ballY = 138;
   tft.fillRect(40,2,27,25,ILI9341_BLACK);
   tft.setCursor(40,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
@@ -289,6 +293,8 @@ void resetGame(){
   tft.setCursor(265,2);
   tft.setTextSize(3); tft.setTextColor(ILI9341_WHITE);
   tft.println(score2,DEC);
+  tft.fillRect(40,40,220,180,ILI9341_BLACK);
+  tft.fillCircle(ballX,ballY,4,ILI9341_YELLOW);
 }
 
 void scoreChange(){
@@ -302,7 +308,7 @@ void scoreChange(){
       
       resetBall();
       if (score1 == 5 && score2 < 5){
-        tft.fillCircle(160,138,4,ILI9341_BLACK);
+        Ganar();
         int thisNote=0;
         for (thisNote == 0; thisNote < 78; thisNote++){
           int noteDuration = noteDurations [thisNote]*1.5;
@@ -312,7 +318,6 @@ void scoreChange(){
 
           noTone(9);
         }
-        Ganar();
         while (score1 == 5 && score2 < 5){
           j1b = digitalRead(bajarJ1);
           j1s = digitalRead(subirJ1);
@@ -341,7 +346,7 @@ void scoreChange(){
       
       resetBall();
       if (score1 < 5 && score2 == 5){
-        tft.fillCircle(160,138,4,ILI9341_BLACK);
+        Ganar();
         int thisNote=0;
         for (thisNote == 0; thisNote < 78; thisNote++){
           int noteDuration = noteDurations [thisNote]*1.5;
@@ -351,12 +356,12 @@ void scoreChange(){
 
           noTone(9);
          }
-         Ganar();
         while (score1 < 5 && score2 == 5){
           j1b = digitalRead(bajarJ1);
           j1s = digitalRead(subirJ1);
           j2b = digitalRead(bajarJ2);
           j2s = digitalRead(subirJ2);
+          
           if (j1b == HIGH || j1s == HIGH || j2b == HIGH || j2s == HIGH){
             delay(100);
           
@@ -415,6 +420,8 @@ void drawBall(){
     }
   } // Aquí termina la progra para limitar la bola al entrar en contacto con la tabla del J2 (derecha).
 }
+
+//Este código pone el sprite en la pantalla ILI-9341
 void drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {
 
   int16_t i, j, byteWidth = (w + 7) / 8;
@@ -428,17 +435,18 @@ void drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h
     }
   }
 }
-
-void Ganar(){
-  drawBitmap(100,76,cofre1,120,89,ILI9341_WHITE);
-  delay(2);
-  tft.fillRect(100,76,120,89,ILI9341_BLACK);
-  //drawBitmap(100,66,cofre2,120,109,0xFFFF);
-  //delay(200);
-  drawBitmap(93,60,cofre3,135,120,ILI9341_WHITE);
-  delay(2);
-  tft.fillRect(100,76,120,89,ILI9341_BLACK);
-  //drawBitmap(80,64,cofre4,160,113,0xFFFF);
-  //delay(200);
-  drawBitmap(95,62,cofre5,130,116,ILI9341_WHITE);
+void Ganar(){ //Animación si alguno de los jugadores gana
+  tft.fillRect(150,135,10,10,ILI9341_BLACK);
+  drawBitmap(100,76,cofre1,120,89,0xFFFFFF);
+  delay(100);
+  //drawBitmap(100,66,cofre2,120,109,0x0000);
+  //delay(50);
+  tft.fillRect(40,40,220,180,ILI9341_BLACK);
+  drawBitmap(93,60,cofre3,135,120,0xFFFFFF);
+  delay(100);
+  //drawBitmap(80,64,cofre4,160,113,00000);
+  //delay(50);
+  tft.fillRect(40,40,220,180,ILI9341_BLACK);
+  drawBitmap(95,62,cofre5,130,116,0xFFFFFF);   
+  delay(5);
 }
