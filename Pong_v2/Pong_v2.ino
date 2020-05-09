@@ -391,9 +391,7 @@ void drawBall(){
     delay(2);
     if ((moverX+ballSize) == X_tabla2 && (moverY) >= (Y_tabla2-2) && (moverY+(ballSize/2)) <= (Y_tabla2+tablasAlto) || moverX == (X_tabla1+tablasAncho) && moverY >= (Y_tabla1-2) && (moverY+(ballSize/2)) <= (Y_tabla1+tablasAlto)){
       xDir *= -1;
-      //yDir *= -1;
       ballX += xDir;
-      //ballY += yDir;
 
       tone (9,466,250);//Sonido de choque
       
